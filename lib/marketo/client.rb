@@ -97,7 +97,7 @@ module Rapleaf
       end
 
       def sync_lead_record(lead_record)
-        sync_lead_record(lead_record, nil)
+        sync_lead_with_cookie(lead_record, nil)
       end
 
       # sync a lead (same as sync_lead_record) including the munchkin cookie 
