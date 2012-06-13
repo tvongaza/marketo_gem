@@ -173,15 +173,18 @@ module Rapleaf
           tokens = []
           program_tokens.each_pair do |name,value|
             tokens << { :name => name, :value => value }
-          end
+          end unless program_tokens.nil?
 
           response = send_request("ns1:paramsRequestCampaign", {
+              :source => 'MKTOWS',
               :campaignName => campaign_name,
-              :leadList => leads.collect{ |l| l.to_hash }.to_a,
+              :leadList => leads.collect{ |l| { :leadKey => l.to_hash } }.to_a,
               :programName => program_name,
-              :programTokenList => { :attrib => tokens }})
+              :programTokenList => { :attrib => tokens }
+              })
           return response[:success_request_campaign][:result][:success]
         rescue Exception => e
+          puts e
           @logger.log(e) if @logger
           return nil
         end
