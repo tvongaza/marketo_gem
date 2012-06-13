@@ -201,7 +201,7 @@ module Rapleaf
       def request_campaign(campaign_name, leads, program_name = nil, program_tokens = nil)
         begin
           tokens = []
-          program_tokens.each_pair |name,value|
+          program_tokens.each_pair do |name,value|
             tokens << { :name => name, :value => value }
           end
 
