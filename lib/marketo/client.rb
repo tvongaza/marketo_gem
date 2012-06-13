@@ -191,6 +191,32 @@ module Rapleaf
         end
       end
 
+      # request that one (or more) leads be added to a campaign
+      #
+      # * campaign_name - name of the campaign in marketo
+      # * leads - array of lead_key objects identifying the leads
+      # * program_name - name of the program (or nil)
+      # * program_tokens - token values to override in the program
+      #
+      def request_campaign(campaign_name, leads, program_name = nil, program_tokens = nil)
+        begin
+          tokens = []
+          program_tokens.each_pair |name,value|
+            tokens << { :name => name, :value => value }
+          end
+
+          response = send_request("ns1:paramsRequestCampaign", {
+              :campaignName => campaign_name,
+              :leadList => leads.collect{ |l| l.to_hash }.to_a,
+              :programName => program_name,
+              :programTokenList => { :attrib => tokens }})
+          return response[:success_request_campaign][:result][:success]
+        rescue Exception => e
+          @logger.log(e) if @logger
+          return nil
+        end
+      end
+
       def send_request(namespace, body)
         @header.set_time(DateTime.now)
         response = request(namespace, body, @header.to_hash)
