@@ -97,6 +97,12 @@ module Rapleaf
       end
 
       def sync_lead_record(lead_record)
+        sync_lead_record(lead_record, nil)
+      end
+
+      # sync a lead (same as sync_lead_record) including the munchkin cookie 
+      # for click tracking
+      def sync_lead_with_cookie(lead_record, cookie)
         begin
           attributes = []
           lead_record.each_attribute_pair do |name, value|
@@ -104,6 +110,7 @@ module Rapleaf
           end
 
           response = send_request("ns1:paramsSyncLead", {
+              :marketoCookie => cookie,
               :return_lead => true,
               :lead_record =>
                   {:email               => lead_record.email,
