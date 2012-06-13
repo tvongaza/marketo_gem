@@ -161,6 +161,32 @@ module Rapleaf
         list_operation(list_key, ListOperationType::IS_MEMBER_OF, email)
       end
 
+      # request that one (or more) leads be added to a campaign
+      #
+      # * campaign_name - name of the campaign in marketo
+      # * leads - array of lead_key objects identifying the leads
+      # * program_name - name of the program (or nil)
+      # * program_tokens - token values to override in the program
+      #
+      def request_campaign(campaign_name, leads, program_name = nil, program_tokens = nil)
+        begin
+          tokens = []
+          program_tokens.each_pair do |name,value|
+            tokens << { :name => name, :value => value }
+          end
+
+          response = send_request("ns1:paramsRequestCampaign", {
+              :campaignName => campaign_name,
+              :leadList => leads.collect{ |l| l.to_hash }.to_a,
+              :programName => program_name,
+              :programTokenList => { :attrib => tokens }})
+          return response[:success_request_campaign][:result][:success]
+        rescue Exception => e
+          @logger.log(e) if @logger
+          return nil
+        end
+      end
+
       private
       def list_operation(list_key, list_operation_type, email)
         begin
@@ -185,32 +211,6 @@ module Rapleaf
         begin
           response = send_request("ns1:paramsGetLead", {:lead_key => lead_key.to_hash})
           return LeadRecord.from_hash(response[:success_get_lead][:result][:lead_record_list][:lead_record])
-        rescue Exception => e
-          @logger.log(e) if @logger
-          return nil
-        end
-      end
-
-      # request that one (or more) leads be added to a campaign
-      #
-      # * campaign_name - name of the campaign in marketo
-      # * leads - array of lead_key objects identifying the leads
-      # * program_name - name of the program (or nil)
-      # * program_tokens - token values to override in the program
-      #
-      def request_campaign(campaign_name, leads, program_name = nil, program_tokens = nil)
-        begin
-          tokens = []
-          program_tokens.each_pair do |name,value|
-            tokens << { :name => name, :value => value }
-          end
-
-          response = send_request("ns1:paramsRequestCampaign", {
-              :campaignName => campaign_name,
-              :leadList => leads.collect{ |l| l.to_hash }.to_a,
-              :programName => program_name,
-              :programTokenList => { :attrib => tokens }})
-          return response[:success_request_campaign][:result][:success]
         rescue Exception => e
           @logger.log(e) if @logger
           return nil
